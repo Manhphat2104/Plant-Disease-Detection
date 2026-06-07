@@ -1,9 +1,9 @@
 # 🌿 AI Plant Doctor — Plant Disease Detection
 
-Hệ thống **Computer Vision** chẩn đoán **38 loại bệnh** trên **14 loài cây trồng** từ ảnh lá cây.  
+Hệ thống **Computer Vision** chẩn đoán bệnh trên **14 loài cây trồng** từ ảnh lá cây.  
 Sử dụng **Vision Transformer (ViT)** + **EigenCAM** để giải thích vùng bệnh + **Gemini AI** để đề xuất giải pháp điều trị.
 
-🔗 **Demo:** [Hugging Face Spaces](#) | 📄 **Báo cáo:** TDTU — Computer Vision
+🔗 **Demo:** [Hugging Face Spaces](#https://huggingface.co/spaces/ManhPhat2104/Leaf-Disease-Detection) | 📄 **Báo cáo:** TDTU — Computer Vision
 
 ---
 
@@ -73,26 +73,13 @@ Top-3 Predictions + EigenCAM Heatmap + Gemini Solution
  ┃ ┗ 📜 app.py                # Gradio UI, streaming output
  ┣ 📂 notebook/
  ┃ ┗ 📓 eda.ipynb             # EDA: phân phối class, domain gap, augmentation viz
- ┣ 📂 weight/
- ┃ ┣ 💾 best_checkpoint.pt    # Model tốt nhất (val F1 cao nhất)
- ┃ ┗ 💾 last_checkpoint.pt    # Checkpoint cuối (resume training)
- ┣ 📂 plots/
+ ┣ 📂 output/
  ┃ ┣ 🖼️ loss_curve.png
  ┃ ┣ 🖼️ metrics_curve.png
  ┃ ┗ 🖼️ confusion_matrix.png
  ┣ 📜 requirements.txt
  ┗ 📜 README.md
 ```
-
-**Quan hệ import giữa các file:**
-```
-model.py  ←── inference.py  ←── gradcam.py  ←── app.py
-              └── LLM_solution.py ──────────────────┘
-dataset.py ←── train.py
-```
-
----
-
 ## 🚀 Cài đặt & Chạy
 
 ### 1. Cài thư viện
@@ -126,18 +113,12 @@ python src/train.py
 python src/app.py
 # → http://localhost:7860
 ```
-
 ---
 
 ## 📊 Kết quả thực nghiệm
-
 | Experiment | Dataset | Accuracy | F1-Macro |
 |---|---|---|---|
-| Baseline | PlantVillage only | — | — |
-| + PlantDoc | PV + PlantDoc | — | — |
-
-*(Cập nhật sau khi train xong)*
-
+| + PlantDoc | PV + PlantDoc | 98.8%| 98.4% |
 ---
 
 ## 🛠️ Tech Stack
@@ -155,7 +136,6 @@ python src/app.py
 ---
 
 ## ⚠️ Giới hạn
-
 - Dataset PlantVillage là ảnh studio — độ chính xác giảm với ảnh thực tế nhiều lá chồng chéo
 - Nên chụp **1 lá rõ ràng** chiếm 70–80% khung hình để đạt kết quả tốt nhất
 ---
