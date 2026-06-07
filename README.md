@@ -1,51 +1,161 @@
-# 🌿 AI Plant Doctor - Plant Disease Detection
+# 🌿 AI Plant Doctor — Plant Disease Detection
 
-Hệ thống Thị giác Máy tính (Computer Vision) hỗ trợ chẩn đoán 38 loại bệnh trên cây trồng thông qua hình ảnh. Dự án ứng dụng kiến trúc **Vision Transformer (ViT)** kết hợp với công cụ giải thích mô hình **EigenCAM** và trợ lý ảo AI để đưa ra phác đồ điều trị chi tiết.
+Hệ thống **Computer Vision** chẩn đoán **38 loại bệnh** trên **14 loài cây trồng** từ ảnh lá cây.  
+Sử dụng **Vision Transformer (ViT)** + **EigenCAM** để giải thích vùng bệnh + **Gemini AI** để đề xuất giải pháp điều trị.
 
-## ✨ Tính năng nổi bật
-* **Nhận diện chính xác 38 lớp bệnh:** Hỗ trợ đa dạng các loại cây trồng như Táo, Cà chua, Ngô, Nho, Đào, Khoai tây... 
-* **Bản đồ nhiệt (Heatmap) với EigenCAM:** Không chỉ đưa ra kết quả, hệ thống còn "chỉ điểm" chính xác vị trí vết bệnh trên lá, giúp giải thích quyết định của AI một cách minh bạch.
-* **Trợ lý Nông nghiệp AI (LLM):** Tự động phân tích kết quả và xuất ra phác đồ điều trị, cách phòng ngừa bệnh bằng ngôn ngữ tự nhiên.
-* **Giao diện thân thiện:** Được xây dựng bằng Gradio, cho phép người dùng kéo thả ảnh và nhận kết quả trực quan ngay trên trình duyệt.
+🔗 **Demo:** [Hugging Face Spaces](#) | 📄 **Báo cáo:** TDTU — Computer Vision
 
 ---
 
-## 🗂️ Tập dữ liệu (Dataset)
-Hệ thống sử dụng dữ liệu được tổng hợp từ 2 nguồn chính để đảm bảo khả năng nhận diện tốt trong cả điều kiện tiêu chuẩn lẫn môi trường thực tế phức tạp:
-* **PlantVillage:** Tập dữ liệu gồm các ảnh lá cây được chụp trong điều kiện phòng thí nghiệm (studio), nền đơn sắc. Đóng vai trò là dữ liệu nền tảng giúp mô hình học các nếp nhăn và vết bệnh rõ ràng.
-* **PlantDoc:** Tập dữ liệu gồm các ảnh chụp ngoài môi trường thực tế (in the wild), chứa nhiều nhiễu như ánh sáng phức tạp, lá cây chồng chéo, bóng râm. Việc thêm PlantDoc giúp mô hình tăng mạnh tính khái quát hóa (generalization) khi triển khai thực tế.
+## ✨ Tính năng
 
-**Chiến lược lấy mẫu (Sampling Strategy):**
-Do sự chênh lệch lớn về số lượng ảnh giữa các lớp và 2 nguồn dữ liệu, hệ thống sử dụng **WeightedRandomSampler**:
-* Cân bằng động giữa 38 lớp bệnh (Class-balanced).
-* **Domain Prioritize:** Ưu tiên bốc thăm dữ liệu từ PlantDoc với trọng số **x10** để ép mô hình tập trung học các đặc trưng khó từ môi trường thực tế.
+| Tính năng | Mô tả |
+|---|---|
+| 🔍 Phân loại bệnh | ViT-B/16 fine-tuned, 38 classes, Top-3 confidence |
+| 🔥 EigenCAM Heatmap | Highlight vùng bệnh trên lá, giải thích quyết định AI |
+| 🤖 Trợ lý AI | Gemini đưa ra nguyên nhân, cách xử lý, phòng ngừa |
+| 📊 Confidence chart | Biểu đồ phân phối xác suất top predictions |
+| ⚡ Streaming UI | Kết quả hiển thị từng bước, không chờ toàn bộ |
 
 ---
 
-## ⚙️ Quy trình Huấn luyện (Training Pipeline)
-Quy trình huấn luyện được thiết kế tối ưu cho kiến trúc Transformer với các chiến lược Augmentation phân tầng:
+## 🗂️ Dataset
 
-* **1. Data Augmentation theo Domain:**
-  * **PlantVillage:** Áp dụng Augmentation nhẹ nhàng (Random Resized Crop, Flip, Rotation 20°, Color Jitter) để giữ nguyên cấu trúc ảnh gốc.
-  * **PlantDoc:** Áp dụng Augmentation mạnh tay hơn (Perspective Distortion, Gaussian Blur, Rotation 30°) nhằm bù đắp sự thiếu hụt số lượng dữ liệu và chống overfitting.
-* **2. Tiền xử lý (Preprocessing):** Mọi hình ảnh đều được thay đổi kích thước về `224x224` và đi qua `ViTImageProcessor` (`google/vit-base-patch16-224`) để chuẩn hóa vector đầu vào.
-* **3. Kiến trúc Mô hình:** Fine-tuning mô hình **Vision Transformer (ViT)**. Khác với CNN truyền thống, ViT chia hình ảnh thành các "patches" (mảnh nhỏ) và sử dụng cơ chế Self-Attention để tìm ra mối tương quan toàn cục giữa vết bệnh và cấu trúc lá.
+| Dataset | Số ảnh | Loại | Vai trò |
+|---|---|---|---|
+| **PlantVillage** | ~54,305 | Studio (nền đơn sắc) | Nền tảng học đặc trưng bệnh |
+| **PlantDoc** | ~2,569 | Thực tế (ngoài đồng) | Tăng khả năng tổng quát hóa |
+
+**Chiến lược gộp data:**
+- PlantDoc split (train/valid/test) gộp vào đúng tập tương ứng — **không có data leakage**
+- `WeightedRandomSampler`: cân bằng class + **ưu tiên PlantDoc x10** để bù chênh lệch domain
+- Augmentation **phân tầng theo domain**: PlantDoc dùng augmentation mạnh hơn PlantVillage
+
+---
+
+## 🧠 Kiến trúc mô hình
+
+```
+Input ảnh lá (224×224)
+        ↓
+ViTImageProcessor (normalize ImageNet)
+        ↓
+ViT-B/16 (google/vit-base-patch16-224)
+   - 12 Transformer blocks
+   - 16×16 patch size · 768 hidden dim · 12 attention heads
+        ↓
+Classification Head (Linear 768 → 38)
+        ↓
+Top-3 Predictions + EigenCAM Heatmap + Gemini Solution
+```
+
+**Fine-tuning 3 phases:**
+
+| Phase | Epochs | Layers train | Learning rate |
+|---|---|---|---|
+| 1 | 3 | Chỉ classifier head | 1e-3 |
+| 2 | 7 | 4 blocks cuối + head | 1e-4 (layer-wise decay) |
+| 3 | 15 | Toàn bộ model | 1e-5 / 1e-4 |
 
 ---
 
 ## 📂 Cấu trúc dự án
-```text
-📦 Plant-Disease-Detection
- ┣ 📂 notebook/          # Chứa các file Jupyter Notebook (EDA, phân tích dữ liệu)
- ┣ 📂 output/            # Chứa các biểu đồ EDA, hình ảnh test và kết quả đánh giá mô hình
- ┣ 📂 src/               # Mã nguồn chính của hệ thống
- ┃ ┣ 📜 app.py               # File giao diện chính (Gradio Web UI)
- ┃ ┣ 📜 dataset.py           # Tiền xử lý dữ liệu, Augmentation và DataLoader
- ┃ ┣ 📜 gradcam.py           # Kỹ thuật EigenCAM tạo bản đồ nhiệt
- ┃ ┣ 📜 inference.py         # Hàm dự đoán chính của mô hình ViT
- ┃ ┣ 📜 LLM_solution.py      # Module tích hợp LLM xuất phác đồ điều trị
- ┃ ┣ 📜 model.py             # Khởi tạo kiến trúc Vision Transformer
- ┃ ┗ 📜 train.py             # Script huấn luyện mô hình
- ┣ 📜 .gitignore         # File cấu hình bỏ qua các file nặng/tạm của Git
- ┣ 📜 requirements.txt   # Danh sách thư viện cần thiết
- ┗ 📜 README.md          # Tài liệu giới thiệu dự án
+
+```
+📦 plant-disease-detection/
+ ┣ 📂 src/
+ ┃ ┣ 📜 model.py              # ViT build_model() + load_checkpoint() + CLASS_NAMES
+ ┃ ┣ 📜 dataset.py            # LeafDiseaseDataset, read_plantdoc(), get_dataloader()
+ ┃ ┣ 📜 train.py              # 3-phase training, early stopping, biểu đồ
+ ┃ ┣ 📜 inference.py          # Singleton get_model(), predict(), load_image()
+ ┃ ┣ 📜 gradcam.py            # EigenCAM, ViTGradCAMWrapper, analyze_image()
+ ┃ ┣ 📜 LLM_solution.py       # Gemini API, get_treatment_solution()
+ ┃ ┗ 📜 app.py                # Gradio UI, streaming output
+ ┣ 📂 notebook/
+ ┃ ┗ 📓 eda.ipynb             # EDA: phân phối class, domain gap, augmentation viz
+ ┣ 📂 weight/
+ ┃ ┣ 💾 best_checkpoint.pt    # Model tốt nhất (val F1 cao nhất)
+ ┃ ┗ 💾 last_checkpoint.pt    # Checkpoint cuối (resume training)
+ ┣ 📂 plots/
+ ┃ ┣ 🖼️ loss_curve.png
+ ┃ ┣ 🖼️ metrics_curve.png
+ ┃ ┗ 🖼️ confusion_matrix.png
+ ┣ 📜 requirements.txt
+ ┗ 📜 README.md
+```
+
+**Quan hệ import giữa các file:**
+```
+model.py  ←── inference.py  ←── gradcam.py  ←── app.py
+              └── LLM_solution.py ──────────────────┘
+dataset.py ←── train.py
+```
+
+---
+
+## 🚀 Cài đặt & Chạy
+
+### 1. Cài thư viện
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Cấu hình API Key (Gemini)
+
+```bash
+# Windows
+set GEMINI_API_KEY=your_api_key_here
+
+# Linux / Mac
+export GEMINI_API_KEY=your_api_key_here
+```
+
+Lấy API key miễn phí tại: [aistudio.google.com](https://aistudio.google.com/app/apikey)
+
+### 3. Train mô hình
+
+```bash
+# Sửa đường dẫn dataset trong CONFIG trước
+python src/train.py
+```
+
+### 4. Chạy app
+
+```bash
+python src/app.py
+# → http://localhost:7860
+```
+
+---
+
+## 📊 Kết quả thực nghiệm
+
+| Experiment | Dataset | Accuracy | F1-Macro |
+|---|---|---|---|
+| Baseline | PlantVillage only | — | — |
+| + PlantDoc | PV + PlantDoc | — | — |
+
+*(Cập nhật sau khi train xong)*
+
+---
+
+## 🛠️ Tech Stack
+
+| Thành phần | Công nghệ |
+|---|---|
+| Model | `transformers` — ViTForImageClassification |
+| Explainability | `pytorch-grad-cam` — EigenCAM |
+| Training | PyTorch + AMP (mixed precision) |
+| Preprocessing | `ViTImageProcessor` (HuggingFace) |
+| LLM | Google Gemini 2.5 Flash Lite |
+| UI | Gradio 4.x |
+| Deploy | Hugging Face Spaces |
+
+---
+
+## ⚠️ Giới hạn
+
+- Dataset PlantVillage là ảnh studio — độ chính xác giảm với ảnh thực tế nhiều lá chồng chéo
+- Nên chụp **1 lá rõ ràng** chiếm 70–80% khung hình để đạt kết quả tốt nhất
+---
