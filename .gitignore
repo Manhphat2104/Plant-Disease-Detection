@@ -8,11 +8,6 @@ __pycache__/
 weight/
 *.pt
 *.pth
-
-# Bỏ qua các file kết quả đầu ra (Plots, ảnh test, log...)
-output/
-outputs/
-plots/
 *.log
 
 # Bỏ qua file tạm của Jupyter Notebook
