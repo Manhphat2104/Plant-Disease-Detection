@@ -1,0 +1,26 @@
+# Bỏ qua các file tạm của Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Bỏ qua thư mục chứa trọng số mô hình (Rất nặng, GitHub sẽ báo lỗi nếu đẩy lên)
+weight/
+*.pt
+*.pth
+
+# Bỏ qua các file kết quả đầu ra (Plots, ảnh test, log...)
+output/
+outputs/
+plots/
+*.log
+
+# Bỏ qua file tạm của Jupyter Notebook
+.ipynb_checkpoints/
+
+# Bỏ qua các file cấu hình chứa mật khẩu/token (Nếu có)
+.env
+
+# Bỏ qua các thư mục chứa Dataset (Bạn có thể bỏ comment nếu có các thư mục này)
+# PlantVillage-Dataset-master/
+# PlantDoc/
