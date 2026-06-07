@@ -3,7 +3,7 @@
 Hệ thống **Computer Vision** chẩn đoán bệnh trên **14 loài cây trồng** từ ảnh lá cây.  
 Sử dụng **Vision Transformer (ViT)** + **EigenCAM** để giải thích vùng bệnh + **Gemini AI** để đề xuất giải pháp điều trị.
 
-🔗 **Demo:** [Hugging Face Spaces](#https://huggingface.co/spaces/ManhPhat2104/Leaf-Disease-Detection) | 📄 **Báo cáo:** TDTU — Computer Vision
+🔗 **Demo:** [Hugging Face Spaces](https://huggingface.co/spaces/ManhPhat2104/Leaf-Disease-Detection) | 📄 **Báo cáo:** TDTU — Computer Vision
 
 ---
 
